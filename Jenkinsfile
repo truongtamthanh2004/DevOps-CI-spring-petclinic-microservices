@@ -100,7 +100,7 @@ pipeline {
                 script {
                     SERVICES.split(',').each { service ->
                         echo "Running tests for ${service}..."
-                        sh "cd ${service} && mvn test"
+                        sh "cd ${service} && mvn test -Dmaven.repo.local=.maven_cache"
                         
                         // Upload test results
                         junit "**/${service}/target/surefire-reports/*.xml"

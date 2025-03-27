@@ -12,9 +12,17 @@ pipeline {
         stage('Detect Changes') {
             steps {
                 script {
-                    def changedFiles = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim().split("\n")
-                    def servicesToBuild = []
+                    def changedFiles = []
+                    def hasPreviousCommit = sh(script: 'git rev-parse HEAD~1', returnStatus: true) == 0
+                    
+                    if (hasPreviousCommit) {
+                        changedFiles = sh(script: 'git diff --name-only HEAD~1', returnStdout: true).trim().split("\n")
+                    } else {
+                        echo "No previous commit found. Assuming all services changed."
+                        changedFiles = SERVICES.split(',')
+                    }
 
+                    def servicesToBuild = []
                     SERVICES.split(',').each { service ->
                         if (changedFiles.any { it.startsWith(service.trim()) }) {
                             servicesToBuild.add(service.trim())
@@ -23,6 +31,7 @@ pipeline {
 
                     if (servicesToBuild.isEmpty()) {
                         echo "No relevant changes detected. Skipping build."
+                        currentBuild.result = 'SUCCESS'
                         return
                     } else {
                         env.SERVICES_TO_BUILD = servicesToBuild.join(',')
@@ -31,6 +40,7 @@ pipeline {
                 }
             }
         }
+
         stage('Test') {
             steps {
                 script {

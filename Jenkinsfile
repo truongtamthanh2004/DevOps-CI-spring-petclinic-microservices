@@ -112,12 +112,15 @@ pipeline {
 
                             // Upload JaCoCo coverage report
                             def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
+                            sh "if [ -f ${coverageFile} ]; then echo 'JaCoCo file exists'; else echo 'JaCoCo file missing'; fi"
+                            sh "set -x && ls -l ${service}/target/site/jacoco/ && cat ${coverageFile} || echo 'File not readable'"
                             sh "chmod 644 ${service}/target/site/jacoco/jacoco.xml"
                             if (fileExists(coverageFile)) {
                                 jacoco execPattern: "**/${service}/target/jacoco.exec",
                                        classPattern: "**/${service}/target/classes",
                                        sourcePattern: "**/${service}/src/main/java",
-                                       minimumInstructionCoverage: '80'
+                                       minimumInstructionCoverage: '80',
+                                       changeBuildStatus: true
                             } else {
                                 echo "JaCoCo coverage report not found for ${service}, skipping..."
                             }

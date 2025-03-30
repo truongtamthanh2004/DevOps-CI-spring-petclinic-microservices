@@ -118,7 +118,7 @@ pipeline {
                                 def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
                                 if (fileExists(coverageFile)) {
                                     sh "ls -la ${service}/target/site/jacoco/"
-                                    sh "set -x && chmod 644 ${coverageFile} || echo 'Failed to change permissions'"
+                                    sh "sudo chmod 644 ${coverageFile} || echo 'sudo failed'"
                                     jacoco execPattern: "**/${service}/target/jacoco.exec",
                                            classPattern: "**/${service}/target/classes",
                                            sourcePattern: "**/${service}/src/main/java",

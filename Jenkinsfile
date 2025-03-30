@@ -105,6 +105,8 @@ pipeline {
                             echo "Running tests for ${service}..."
                             sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache"
 
+                            sh "ls -la ${service}/target/site/jacoco/ || echo 'Directory not found'"
+
                             // Upload test results
                             junit "**/${service}/target/surefire-reports/*.xml"
 

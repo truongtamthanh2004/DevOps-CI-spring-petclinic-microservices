@@ -117,6 +117,7 @@ pipeline {
                                 // Handle JaCoCo coverage
                                 def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
                                 if (fileExists(coverageFile)) {
+                                    sh "ls -la ${service}/target/site/jacoco/"
                                     sh "chmod 644 ${coverageFile}"
                                     jacoco execPattern: "**/${service}/target/jacoco.exec",
                                            classPattern: "**/${service}/target/classes",

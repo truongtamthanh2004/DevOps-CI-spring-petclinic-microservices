@@ -120,7 +120,7 @@ pipeline {
                     // SERVICES.split(',').each { service ->
                     affectedServices.each { service ->
                         try {
-                            if (service == "spring-petclinic-admin-server" || service == "spring-petclinic-api-gateway" || service == "spring-petclinic-config-server" || service == "spring-petclinic-genai-service") {
+                            if (service == "spring-petclinic-admin-server" || service == "spring-petclinic-genai-service") {
                                 echo "Skipping tests for ${service} (No test cases available)."
                             } else {
                                 echo "Running tests for ${service}..."

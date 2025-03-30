@@ -118,7 +118,7 @@ pipeline {
                                 def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
                                 if (fileExists(coverageFile)) {
                                     sh "ls -la ${service}/target/site/jacoco/"
-                                    sh "sudo chmod 644 ${coverageFile} || echo 'sudo failed'"
+                                    sh "ls -l spring-petclinic-vets-service/target/site/jacoco/jacoco.xml"
                                     jacoco execPattern: "**/${service}/target/jacoco.exec",
                                            classPattern: "**/${service}/target/classes",
                                            sourcePattern: "**/${service}/src/main/java",

@@ -100,17 +100,20 @@ pipeline {
                 script {
                     SERVICES.split(',').each { service ->
                         echo "Running tests for ${service}..."
-                        sh "cd ${service} && mvn test -Dmaven.repo.local=.maven_cache"
-                        
+                        sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache"
+
                         // Upload test results
                         junit "**/${service}/target/surefire-reports/*.xml"
 
-                        // Upload coverage report if available
-                        def coverageFile = "${service}/target/site/cobertura/coverage.xml"
+                        // Upload JaCoCo coverage report
+                        def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
                         if (fileExists(coverageFile)) {
-                            cobertura coberturaReportFile: "**/${service}/target/site/cobertura/coverage.xml"
+                            jacoco execPattern: "**/${service}/target/jacoco.exec",
+                                   classPattern: "**/${service}/target/classes",
+                                   sourcePattern: "**/${service}/src/main/java",
+                                   minimumInstructionCoverage: '80'
                         } else {
-                            echo "Coverage report not found for ${service}, skipping..."
+                            echo "JaCoCo coverage report not found for ${service}, skipping..."
                         }
                     }
                 }

@@ -99,21 +99,25 @@ pipeline {
             steps {
                 script {
                     SERVICES.split(',').each { service ->
-                        echo "Running tests for ${service}..."
-                        sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache"
-
-                        // Upload test results
-                        junit "**/${service}/target/surefire-reports/*.xml"
-
-                        // Upload JaCoCo coverage report
-                        def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
-                        if (fileExists(coverageFile)) {
-                            jacoco execPattern: "**/${service}/target/jacoco.exec",
-                                   classPattern: "**/${service}/target/classes",
-                                   sourcePattern: "**/${service}/src/main/java",
-                                   minimumInstructionCoverage: '80'
+                        if (service == "spring-petclinic-admin-server") {
+                            echo "Skipping tests for ${service} (No test cases available)."
                         } else {
-                            echo "JaCoCo coverage report not found for ${service}, skipping..."
+                            echo "Running tests for ${service}..."
+                            sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache"
+
+                            // Upload test results
+                            junit "**/${service}/target/surefire-reports/*.xml"
+
+                            // Upload JaCoCo coverage report
+                            def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
+                            if (fileExists(coverageFile)) {
+                                jacoco execPattern: "**/${service}/target/jacoco.exec",
+                                       classPattern: "**/${service}/target/classes",
+                                       sourcePattern: "**/${service}/src/main/java",
+                                       minimumInstructionCoverage: '80'
+                            } else {
+                                echo "JaCoCo coverage report not found for ${service}, skipping..."
+                            }
                         }
                     }
                 }
@@ -132,4 +136,5 @@ pipeline {
         }
     }
 }
+
 

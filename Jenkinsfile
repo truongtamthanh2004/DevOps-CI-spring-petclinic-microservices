@@ -98,7 +98,27 @@ pipeline {
         stage('Test') {
             steps {
                 script {
-                    SERVICES.split(',').each { service ->
+                    def changed_services = sh(script: "git diff --name-only HEAD~1", returnStdout: true).trim().split("\n")
+                    def affectedServices = []
+                    
+                    SERVICES.split(',').each {
+                      service ->
+                      if (changed_services.find { it.startsWith(service + '/') }) {
+                        affectedServices.add(service)
+                      }
+                    }
+
+                    if (affectedServices.isEmpty()) {
+                        echo "No relevant changes detected. Skipping build."
+                        currentBuild.result = 'SUCCESS'
+                        return
+                    }
+
+                    echo "Services to be built: ${affectedServices.join(', ')}"
+                    env.BUILD_SERVICES = affectedServices.join(',')
+                  
+                    // SERVICES.split(',').each { service ->
+                    affectedServices.each { service ->
                         try {
                             if (service == "spring-petclinic-admin-server" || service == "spring-petclinic-api-gateway" || service == "spring-petclinic-config-server" || service == "spring-petclinic-genai-service") {
                                 echo "Skipping tests for ${service} (No test cases available)."
@@ -141,7 +161,8 @@ pipeline {
         stage('Build') {
             steps {
                 script {
-                    SERVICES.split(',').each { service ->
+                    // SERVICES.split(',').each { service ->
+                    env.BUILD_SERVICES.split(',').each { service ->
                         echo "Building ${service}..."
                         sh "cd ${service} && mvn clean package"
                     }

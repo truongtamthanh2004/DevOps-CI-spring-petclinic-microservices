@@ -112,6 +112,7 @@ pipeline {
 
                             // Upload JaCoCo coverage report
                             def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
+                            sh "chmod 644 ${service}/target/site/jacoco/jacoco.xml"
                             if (fileExists(coverageFile)) {
                                 jacoco execPattern: "**/${service}/target/jacoco.exec",
                                        classPattern: "**/${service}/target/classes",

@@ -27,7 +27,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 public class GenAIServiceApplication {
 
 	public static void main(String[] args) {
-		System.out.println("Starting GenAIServiceApplication...");
+		System.out.println("Starting GenAIServiceApplication....");
 		SpringApplication.run(GenAIServiceApplication.class, args);
 	}
 }

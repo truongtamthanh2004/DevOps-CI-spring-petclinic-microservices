@@ -92,7 +92,7 @@ pipeline {
         maven 'Maven3'
     }
     environment {
-        SERVICES = "spring-petclinic-vets-service,spring-petclinic-customers-service,spring-petclinic-visits-service,spring-petclinic-admin-server,spring-petclinic-api-gateway,spring-petclinic-config-server,spring-petclinic-genai-service,spring-petclinic-discovery-server",
+        SERVICES = "spring-petclinic-vets-service,spring-petclinic-customers-service,spring-petclinic-visits-service,spring-petclinic-admin-server,spring-petclinic-api-gateway,spring-petclinic-config-server,spring-petclinic-genai-service,spring-petclinic-discovery-server"
         BUILD_SERVICES = ""
     }
     stages {
@@ -163,6 +163,10 @@ pipeline {
             steps {
                 script {
                     // SERVICES.split(',').each { service ->
+                    if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
+                      echo "Skipping build"
+                      return
+                    }
                     env.BUILD_SERVICES.split(',').each { service ->
                         echo "Building ${service}..."
                         sh "cd ${service} && mvn clean package"

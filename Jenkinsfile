@@ -96,30 +96,81 @@ pipeline {
         BUILD_SERVICES = ""
     }
     stages {
+        // Maven build life cycle:
+
+        // -- Validate stage -- 
+        // validate - validate the project is correct and all necessary information is available
+      
+        // -- Build stage --
+        // compile - compile the source code of the project
+
+        // -- Test stage -- 
+        // test - test the compiled source code using a suitable unit testing framework. These tests should not require the code be packaged or deployed
+
+        // -- can be safely ignored (not related to current proj) --
+        // package - take the compiled code and package it in its distributable format, such as a JAR.
+        // verify - run any checks on results of integration tests to ensure quality criteria are met
+        // install - install the package into the local repository, for use as a dependency in other projects locally
+        // deploy - done in the build environment, copies the final package to the remote repository for sharing with other developers and projects.
+
+        stage('Validate') {
+          steps {
+            script {
+              // detecting changes
+              def changed_services = sh(script: "git diff --name-only HEAD~1", returnStdout: true).trim().split("\n")
+              def affectedServices = []
+
+              // extracting services with changes
+              SERVICES.split(',').each {
+                service ->
+                if (changed_services.find { it.startsWith(service + '/') }) {
+                  affectedServices.add(service)
+                }
+              }
+
+              
+              if (affectedServices.isEmpty()) {
+                  echo "No relevant changes detected. Skipping validation."
+                  currentBuild.result = 'SUCCESS'
+                  return
+              }
+
+              affectedServices.each { service -> 
+                  echo "Validating ${service}..."
+                  sh "cd ${service} && mvn validate"
+              }
+            }
+          }
+        }
+      
+        stage('Build') {
+            steps {
+                script {
+                  
+                    if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
+                      echo "Skipping build"
+                      return
+                    }
+                  
+                    env.BUILD_SERVICES.split(',').each { service ->
+                        echo "Building ${service}..."
+                        sh "cd ${service} && mvn clean compile"
+                    }
+                }
+            }
+        }
+      
         stage('Test') {
             steps {
                 script {
-                    def changed_services = sh(script: "git diff --name-only HEAD~1", returnStdout: true).trim().split("\n")
-                    def affectedServices = []
-                    
-                    SERVICES.split(',').each {
-                      service ->
-                      if (changed_services.find { it.startsWith(service + '/') }) {
-                        affectedServices.add(service)
-                      }
+                   if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
+                      echo "Skipping test"
+                      return
                     }
-
-                    if (affectedServices.isEmpty()) {
-                        echo "No relevant changes detected. Skipping build."
-                        currentBuild.result = 'SUCCESS'
-                        return
-                    }
-
-                    echo "Services to be built: ${affectedServices.join(', ')}"
-                    env.BUILD_SERVICES = affectedServices.join(',')
                   
                     // SERVICES.split(',').each { service ->
-                    affectedServices.each { service ->
+                    // affectedServices.each { service ->
+                    env.BUILD_SERVICES.split(',').each { service ->
                         try {
                             if (service == "spring-petclinic-admin-server" || service == "spring-petclinic-genai-service") {
                                 echo "Skipping tests for ${service} (No test cases available)."
@@ -159,21 +210,7 @@ pipeline {
             }
         }
 
-        stage('Build') {
-            steps {
-                script {
-                    // SERVICES.split(',').each { service ->
-                    if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
-                      echo "Skipping build"
-                      return
-                    }
-                    env.BUILD_SERVICES.split(',').each { service ->
-                        echo "Building ${service}..."
-                        sh "cd ${service} && mvn clean package"
-                    }
-                }
-            }
-        }
+
     }
 }
 

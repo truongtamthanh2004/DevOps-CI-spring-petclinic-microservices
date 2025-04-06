@@ -135,12 +135,14 @@ pipeline {
                   return
               }
 
+              env.BUILD_SERVICES = affectedServices.join(',')
+              
               affectedServices.each { service -> 
                   echo "Validating ${service}..."
                   sh "cd ${service} && mvn validate"
               }
 
-              env.BUILD_SERVICES = affectedServices.join(',')
+              
             }
           }
         }

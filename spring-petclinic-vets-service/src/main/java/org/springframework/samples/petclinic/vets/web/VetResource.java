@@ -44,6 +44,7 @@ class VetResource {
     @GetMapping
     @Cacheable("vets")
     public List<Vet> showResourcesVetList() {
+        System.out.println("Fetching all vets from the database...");
         return vetRepository.findAll();
     }
 }

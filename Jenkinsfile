@@ -179,8 +179,7 @@ pipeline {
                                 echo "Skipping tests for ${service} (No test cases available)."
                             } else {
                                 echo "Running tests for ${service}..."
-                                // Add -Dmaven.test.failure.ignore=true to continue on test failures
-                                sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache -Dmaven.test.failure.ignore=true"
+                                sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache"
 
                                 // Debug directory structure
                                 sh "pwd && ls -la ${service}/target/ || true"
@@ -213,7 +212,21 @@ pipeline {
             }
         }
 
-
+        stage('Verify') {
+            steps {
+                script {
+                    if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
+                      echo "Skipping verify"
+                      return
+                    }
+                  
+                    env.BUILD_SERVICES.split(',').each { service ->
+                        echo "Verifying ${service}..."
+                        sh "cd ${service} && mvn verify -Dmaven.repo.local=.maven_cache"
+                    }
+                }
+            }
+        }
     }
 }
 

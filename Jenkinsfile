@@ -194,11 +194,11 @@ pipeline {
                                 def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
                                 if (fileExists(coverageFile)) {
                                     sh "ls -la ${service}/target/site/jacoco/"
-                                    sh "ls -l spring-petclinic-vets-service/target/site/jacoco/jacoco.xml"
+                                    sh "ls -l ${service}/target/site/jacoco/jacoco.xml"
                                     jacoco execPattern: "**/${service}/target/jacoco.exec",
                                            classPattern: "**/${service}/target/classes",
                                            sourcePattern: "**/${service}/src/main/java",
-                                           minimumInstructionCoverage: '0'
+                                           minimumInstructionCoverage: '70'
                                 } else {
                                     echo "JaCoCo coverage report not found for ${service}, skipping..."
                                     // Debug why file is missing

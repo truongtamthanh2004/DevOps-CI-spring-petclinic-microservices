@@ -139,4 +139,27 @@ public class Owner {
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Owner owner = (Owner) o;
+        return Objects.equals(id, owner.id) &&
+               Objects.equals(firstName, owner.firstName) &&
+               Objects.equals(lastName, owner.lastName) &&
+               Objects.equals(address, owner.address) &&
+               Objects.equals(city, owner.city) &&
+               Objects.equals(telephone, owner.telephone);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, address, city, telephone);
+    }
+
+    // Setting _id
+    public void setId(Integer id) {
+        this.id = id;
+    }
 }

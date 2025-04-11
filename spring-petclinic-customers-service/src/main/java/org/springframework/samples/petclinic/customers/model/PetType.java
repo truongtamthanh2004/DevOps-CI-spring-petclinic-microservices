@@ -48,4 +48,17 @@ public class PetType {
     public void setName(String name) {
         this.name = name;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PetType petType = (PetType) o;
+        return id != null && id.equals(petType.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : 0;
+    }
 }

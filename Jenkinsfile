@@ -140,50 +140,37 @@ pipeline {
                   echo "Validating ${service}..."
                   sh "cd ${service} && mvn validate"
               }
-
-              
             }
           }
         }
       
         stage('Build') {
+            when {
+                expression { return env.BUILD_SERVICES }
+            }
             steps {
                 script {
-                  
-                    if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
-                      echo "Skipping build"
-                      return
-                    }
-                  
                     env.BUILD_SERVICES.split(',').each { service ->
                         echo "Building ${service}..."
-                        sh "cd ${service} && mvn clean compile"
+                        sh "./mvnw -pl ${env.CHANGED_SERVICE} -am clean compile"
                     }
                 }
             }
         }
       
         stage('Test') {
+            when {
+                expression { return env.BUILD_SERVICES }
+            }
             steps {
                 script {
-                   if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
-                      echo "Skipping test"
-                      return
-                    }
-                  
-                    // SERVICES.split(',').each { service ->
-                    // affectedServices.each { service ->
                     env.BUILD_SERVICES.split(',').each { service ->
                         try {
                             if (service == "spring-petclinic-admin-server" || service == "spring-petclinic-genai-service") {
                                 echo "Skipping tests for ${service} (No test cases available)."
                             } else {
                                 echo "Running tests for ${service}..."
-                                sh "cd ${service} && mvn test verify -Dmaven.repo.local=.maven_cache"
-
-                                // Debug directory structure
-                                sh "pwd && ls -la ${service}/target/ || true"
-                                sh "ls -la ${service}/target/site/jacoco/ || echo 'Directory not found'"
+                                sh "./mvnw -pl ${env.CHANGED_SERVICE} test -Dmaven.repo.local=.maven_cache"
 
                                 // Upload test results
                                 junit "**/${service}/target/surefire-reports/*.xml"
@@ -191,8 +178,6 @@ pipeline {
                                 // Handle JaCoCo coverage
                                 def coverageFile = "${service}/target/site/jacoco/jacoco.xml"
                                 if (fileExists(coverageFile)) {
-                                    sh "ls -la ${service}/target/site/jacoco/"
-                                    sh "ls -l ${service}/target/site/jacoco/jacoco.xml"
                                     jacoco execPattern: "**/${service}/target/jacoco.exec",
                                            classPattern: "**/${service}/target/classes",
                                            sourcePattern: "**/${service}/src/main/java",
@@ -213,13 +198,11 @@ pipeline {
         }
 
         stage('Verify') {
+            when {
+                expression { return env.BUILD_SERVICES }
+            }
             steps {
                 script {
-                    if (!env.BUILD_SERVICES || env.BUILD_SERVICES == "") {
-                      echo "Skipping verify"
-                      return
-                    }
-                  
                     env.BUILD_SERVICES.split(',').each { service ->
                         echo "Verifying ${service}..."
                         sh "cd ${service} && mvn verify -Dmaven.repo.local=.maven_cache"

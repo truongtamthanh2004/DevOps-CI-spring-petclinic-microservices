@@ -109,6 +109,9 @@ pipeline {
                     env.BUILD_SERVICES.split(',').each { service ->
                         echo "Verifying ${service}..."
                         sh "cd ${service} && mvn verify -Dmaven.repo.local=.maven_cache"
+
+                        echo "Arhiving ${service}..."
+                        archiveArtifacts artifacts: "${service}/target/*.jar", allowEmptyArchive: true
                     }
                 }
             }

@@ -86,7 +86,8 @@ pipeline {
                             }
                         } catch (Exception e) {
                             echo "Error testing ${service}: ${e.toString()}"
-                            // Continue with next service
+                            // fail the build if any test fails
+                            currentBuild.result = 'FAILURE'
                         }
                     }
                 }

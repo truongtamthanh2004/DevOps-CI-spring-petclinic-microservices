@@ -158,7 +158,7 @@ public class Owner {
         return Objects.hash(id, firstName, lastName, address, city, telephone);
     }
 
-    // Setting id
+    // Setting _id
     public void setId(Integer id) {
         this.id = id;
     }
